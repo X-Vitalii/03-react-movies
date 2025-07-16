@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from "axios";
-import { Movie } from "../types/movie";
+import { type Movie } from "../types/movie";
 
 interface SearchResponse {
   page: number;
