@@ -4,9 +4,9 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { Toaster } from "react-hot-toast";
 import { type Movie } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
-import toast, { Toaster } from "react-hot-toast";
 
 export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -15,28 +15,26 @@ export default function App() {
   const [error, setError] = useState(false);
 
   const handleSearch = async (query: string) => {
+    setError(false);
+    setLoading(true);
+
     try {
-      setLoading(true);
+      const data = await fetchMovies(query);
+      setMovies(data);
       setError(false);
-      setMovies([]);
-
-      const results = await fetchMovies(query);
-      if (results.length === 0) {
-        toast.error(`No movies found for your request.`);
-      }
-
-      setMovies(results);
-    } catch (error) {
-      toast.error("Something went wrong. Please try again.");
-      console.error(error);
+    } catch (err: unknown) {
+      setError(true);
+      console.error(
+        "Error fetching movies:",
+        err instanceof Error ? err.message : err
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelect = (movie: Movie) => {
+  const handleSelectMovie = (movie: Movie) => {
     setSelectedMovie(movie);
-    console.log("Selected movie", movie);
   };
 
   const handleCloseModal = () => {
@@ -45,12 +43,10 @@ export default function App() {
 
   return (
     <>
-      <SearchBar onSubmit={handleSearch} />
+      <SearchBar onSearch={handleSearch} />
       {loading && <Loader />}
       {error && <ErrorMessage />}
-      {!loading && !error && movies.length > 0 && (
-        <MovieGrid movies={movies} onSelect={handleSelect} />
-      )}
+      <MovieGrid movies={movies} onSelect={handleSelectMovie} />
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
