@@ -4,7 +4,7 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import { type Movie } from "../../types/movie";
 import { fetchMovies } from "../../services/movieService";
 
@@ -21,7 +21,10 @@ export default function App() {
     try {
       const data = await fetchMovies(query);
       setMovies(data);
-      setError(false);
+
+      if (data.length === 0) {
+        toast("No movies found. Try a different search term.");
+      }
     } catch (err: unknown) {
       setError(true);
       console.error(
@@ -43,7 +46,7 @@ export default function App() {
 
   return (
     <>
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar onSubmit={handleSearch} />
       {loading && <Loader />}
       {error && <ErrorMessage />}
       <MovieGrid movies={movies} onSelect={handleSelectMovie} />
